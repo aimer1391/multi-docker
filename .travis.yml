@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t aimer1319/react-test -f ./client/Dockerfile.dev ./client/Dockerfile.dev
+
+script:
+  - docker run aimer1319/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t aimer1319/mulit-client ./client 
+  - docker build -t aimer1319/mulit-nginx ./nginx
+  - docker build -t aimer1319/mulit-server ./server
+  - docker build -t aimer1319/mulit-worker ./worker
+# Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+# Take those images and pus them to docker hub
+  - docker push aimer1319/mulit-client
+  - docker push aimer1319/mulit-nginx
+  - docker push aimer1319/mulit-server
+  - docker push aimer1319/mulit-worker
